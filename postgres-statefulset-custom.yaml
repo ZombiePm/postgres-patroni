@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: postgres
-        image: postgres-patroni:15  # Your custom image
+        image: postgres-patroni:17  # Your custom image
         ports:
         - containerPort: 5432
           name: postgres

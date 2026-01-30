@@ -1,19 +1,26 @@
-# PostgreSQL Patroni Cluster with Synchronous Replication
+# PostgreSQL 17 Patroni Cluster with Synchronous Replication
 
-This repository contains Kubernetes manifests for deploying a highly available PostgreSQL cluster using Patroni with synchronous replication.
+This repository contains Kubernetes manifests for deploying a highly available PostgreSQL 17 cluster using Patroni with synchronous replication.
 
 ## Architecture
 
 - **etcd**: 3-node cluster for distributed configuration storage
-- **PostgreSQL**: 2-node Patroni cluster with synchronous replication
+- **PostgreSQL**: 2-node Patroni cluster with PostgreSQL 17 and synchronous replication
 - **Sync Mode**: Strict synchronous replication (`synchronous_commit: on`)
 
 ## Components
 
-1. **etcd cluster** (3 replicas)
-2. **Patroni PostgreSQL cluster** (2 replicas)
+1. **etcd cluster** (3 replicas) - etcd v3.5.9
+2. **Patroni PostgreSQL cluster** (2 replicas) - PostgreSQL 17
 3. **Services**: Headless service for Patroni discovery
 4. **ConfigMaps**: Patroni configuration
+
+## Versions
+
+- **PostgreSQL**: 17
+- **Spilo**: 17:4.0-p3
+- **etcd**: v3.5.9
+- **Patroni**: Latest (included in Spilo)
 
 ## Deployment
 
@@ -33,13 +40,13 @@ kubectl apply -k .
 
 1. Build the image:
 ```bash
-docker build -t postgres-patroni:15 .
+docker build -t postgres-patroni:17 .
 ```
 
 2. Push to your registry (optional):
 ```bash
-docker tag postgres-patroni:15 your-registry/postgres-patroni:15
-docker push your-registry/postgres-patroni:15
+docker tag postgres-patroni:17 your-registry/postgres-patroni:17
+docker push your-registry/postgres-patroni:17
 ```
 
 3. Deploy with custom image:
@@ -60,6 +67,8 @@ kubectl apply -f argocd-application.yaml
 ```
 
 > **Note**: For custom images, update the `image:` field in `postgres-statefulset-custom.yaml` to point to your registry.
+>
+> **Compatibility**: This setup is tested with PostgreSQL 17 and Spilo 17:4.0-p3.
 
 ## Access
 
