@@ -19,7 +19,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: postgres
-        image: registry.opensource.zalan.do/acid/spilo-15:2.0-p4
+        image: postgres-patroni:15  # Your custom image
         ports:
         - containerPort: 5432
           name: postgres
@@ -43,7 +43,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: PATRONI_POSTGRESQL_DATA_DIR
-          value: /home/postgres/pgdata/pgroot/data
+          value: /var/lib/postgresql/data
         - name: PATRONI_POSTGRESQL_PGPASS
           value: /tmp/pgpass
         - name: PATRONI_ETCD_HOST
@@ -56,9 +56,7 @@ spec:
           value: postgres
         volumeMounts:
         - name: data
-          mountPath: /home/postgres/pgdata
-        - name: patroni-config
-          mountPath: /etc/patroni
+          mountPath: /var/lib/postgresql/data
         livenessProbe:
           httpGet:
             path: /liveness
@@ -71,10 +69,6 @@ spec:
             port: 8008
           initialDelaySeconds: 10
           periodSeconds: 5
-      volumes:
-      - name: patroni-config
-        configMap:
-          name: patroni-config
   volumeClaimTemplates:
   - metadata:
       name: data

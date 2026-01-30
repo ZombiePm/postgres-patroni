@@ -17,19 +17,49 @@ This repository contains Kubernetes manifests for deploying a highly available P
 
 ## Deployment
 
-### Option 1: Direct kubectl deployment
+### Option 1: Using Official Spilo Image (if available)
 
+First, verify the image exists:
+```bash
+docker pull registry.opensource.zalan.do/acid/spilo-15:2.0-p4
+```
+
+Then deploy:
 ```bash
 kubectl apply -k .
 ```
 
-### Option 2: ArgoCD deployment
+### Option 2: Build Custom Patroni Image
+
+1. Build the image:
+```bash
+docker build -t postgres-patroni:15 .
+```
+
+2. Push to your registry (optional):
+```bash
+docker tag postgres-patroni:15 your-registry/postgres-patroni:15
+docker push your-registry/postgres-patroni:15
+```
+
+3. Deploy with custom image:
+```bash
+kubectl apply -f namespace.yaml
+kubectl apply -f etcd-service.yaml
+kubectl apply -f etcd-statefulset.yaml
+kubectl apply -f patroni-configmap.yaml
+kubectl apply -f postgres-service.yaml
+kubectl apply -f postgres-statefulset-custom.yaml
+```
+
+### Option 3: ArgoCD deployment
 
 Apply the ArgoCD Application manifest:
-
 ```bash
 kubectl apply -f argocd-application.yaml
 ```
+
+> **Note**: For custom images, update the `image:` field in `postgres-statefulset-custom.yaml` to point to your registry.
 
 ## Access
 
