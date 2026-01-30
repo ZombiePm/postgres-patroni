@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: postgres
+  labels:
+    app: postgres
+spec:
+  serviceName: postgres
+  replicas: 2
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: postgres
+        image: patroni/postgres:15
+        ports:
+        - containerPort: 5432
+          name: postgres
+        - containerPort: 8008
+          name: restapi
+        env:
+        - name: PATRONI_KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PATRONI_KUBERNETES_LABELS
+          value: '{app: postgres}'
+        - name: PATRONI_KUBERNETES_SCOPE_LABEL
+          value: postgres
+        - name: PATRONI_KUBERNETES_USE_ENDPOINTS
+          value: "true"
+        - name: PATRONI_SCOPE
+          value: postgres
+        - name: PATRONI_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PATRONI_POSTGRESQL_DATA_DIR
+          value: /var/lib/postgresql/data/pgdata
+        - name: PATRONI_POSTGRESQL_PGPASS
+          value: /tmp/pgpass
+        - name: PATRONI_ETCD_HOST
+          value: etcd:2379
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: patroni-config
+          mountPath: /etc/patroni
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 8008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8008
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: patroni-config
+        configMap:
+          name: patroni-config
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patroni-config
+  namespace: postgres
+data:
+  patroni.yml: |
+    scope: postgres
+    namespace: /service/
+    name: postgres-0
+    
+    restapi:
+      listen: 0.0.0.0:8008
+      connect_address: postgres-0.postgres:8008
+    
+    etcd:
+      host: etcd:2379
+    
+    bootstrap:
+      dcs:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+        maximum_lag_on_failover: 1048576
+        synchronous_mode: true
+        synchronous_mode_strict: true
+        postgresql:
+          use_pg_rewind: true
+          parameters:
+            max_connections: 100
+            max_wal_senders: 10
+            wal_level: replica
+            synchronous_commit: on
+            synchronous_standby_names: '*'
+            shared_buffers: 128MB
+            effective_cache_size: 1GB
+      initdb:
+      - encoding: UTF8
+      - data-checksums
+      users:
+        replicator:
+          password: repl_password
+          options:
+            - replication
+        postgres:
+          password: postgres_password
+          options:
+            - createdb
+            - createrole
+            - login
+            - superuser
