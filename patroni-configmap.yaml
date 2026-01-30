@@ -49,3 +49,10 @@ data:
             - createrole
             - login
             - superuser
+    
+    # Spilo-specific settings
+    kubernetes:
+      use_endpoints: true
+      pod_ip: ${POD_IP}
+      ports:
+      - port: 5432
