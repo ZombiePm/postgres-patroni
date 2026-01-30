@@ -18,17 +18,25 @@ This repository contains Kubernetes manifests for deploying a highly available P
 ## Versions
 
 - **PostgreSQL**: 17
-- **Spilo**: 17:4.0-p3
+- **Spilo**: ghcr.io/zalando/spilo-17:4.0-p3
 - **etcd**: v3.5.9
 - **Patroni**: Latest (included in Spilo)
 
+## Official Images
+
+All images are pulled from GitHub Container Registry (GHCR):
+- **Spilo**: `ghcr.io/zalando/spilo-17:4.0-p3`
+- **Postgres Operator**: `ghcr.io/zalando/postgres-operator:v1.15.1`
+- **Operator UI**: `ghcr.io/zalando/postgres-operator-ui:v1.15.1`
+- **Logical Backup**: `ghcr.io/zalando/postgres-operator/logical-backup:v1.15.1`
+
 ## Deployment
 
-### Option 1: Using Official Spilo Image (if available)
+### Option 1: Using Official Spilo Image
 
 First, verify the image exists:
 ```bash
-docker pull registry.opensource.zalan.do/acid/spilo-15:2.0-p4
+docker pull ghcr.io/zalando/spilo-17:4.0-p3
 ```
 
 Then deploy:
