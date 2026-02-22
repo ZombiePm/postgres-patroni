@@ -11,7 +11,7 @@ metadata:
   namespace: postgres
 rules:
 - apiGroups: [""]
-  resources: ["endpoints", "pods"]
+  resources: ["endpoints", "pods", "configmaps"]
   verbs: ["get", "list", "watch", "patch", "update", "create", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

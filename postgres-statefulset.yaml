@@ -53,6 +53,8 @@ spec:
           value: cluster-name
         - name: KUBERNETES_ROLE_LABEL
           value: role
+        - name: KUBERNETES_USE_CONFIGMAPS
+          value: "true"
         - name: PATRONI_POSTGRESQL_DATA_DIR
           value: /home/postgres/pgdata/pgroot/data
         - name: PATRONI_POSTGRESQL_PGPASS
