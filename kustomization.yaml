@@ -5,8 +5,6 @@ namespace: postgres
 
 resources:
 - namespace.yaml
-- etcd-service.yaml
-- etcd-statefulset.yaml
-- patroni-configmap.yaml
+- rbac.yaml
 - postgres-service.yaml
 - postgres-statefulset.yaml

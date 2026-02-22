@@ -16,6 +16,7 @@ spec:
       labels:
         app: postgres
     spec:
+      serviceAccountName: patroni
       terminationGracePeriodSeconds: 30
       containers:
       - name: postgres
@@ -26,6 +27,18 @@ spec:
         - containerPort: 8008
           name: restapi
         env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: SCOPE
+          value: postgres
+        - name: PATRONI_SCOPE
+          value: postgres
+        - name: PATRONI_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: PATRONI_KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
@@ -36,29 +49,40 @@ spec:
           value: postgres
         - name: PATRONI_KUBERNETES_USE_ENDPOINTS
           value: "true"
-        - name: PATRONI_SCOPE
-          value: postgres
-        - name: PATRONI_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
         - name: PATRONI_POSTGRESQL_DATA_DIR
           value: /home/postgres/pgdata/pgroot/data
         - name: PATRONI_POSTGRESQL_PGPASS
           value: /tmp/pgpass
-        - name: PATRONI_ETCD_HOST
-          value: etcd:2379
-        - name: POD_IP
-          valueFrom:
-            fieldRef:
-              fieldPath: status.podIP
-        - name: SCOPE
-          value: postgres
+        - name: PGPASSWORD_SUPERUSER
+          value: postgres_password
+        - name: PGPASSWORD_STANDBY
+          value: repl_password
+        - name: SPILO_CONFIGURATION
+          value: |
+            bootstrap:
+              dcs:
+                ttl: 30
+                loop_wait: 10
+                retry_timeout: 10
+                maximum_lag_on_failover: 1048576
+                synchronous_mode: true
+                synchronous_mode_strict: true
+                postgresql:
+                  use_pg_rewind: true
+                  parameters:
+                    max_connections: 100
+                    max_wal_senders: 10
+                    wal_level: replica
+                    synchronous_commit: "on"
+                    synchronous_standby_names: "*"
+                    shared_buffers: 128MB
+                    effective_cache_size: 1GB
+              initdb:
+              - encoding: UTF8
+              - data-checksums
         volumeMounts:
         - name: data
           mountPath: /home/postgres/pgdata
-        - name: patroni-config
-          mountPath: /etc/patroni
         livenessProbe:
           httpGet:
             path: /liveness
@@ -71,10 +95,6 @@ spec:
             port: 8008
           initialDelaySeconds: 10
           periodSeconds: 5
-      volumes:
-      - name: patroni-config
-        configMap:
-          name: patroni-config
   volumeClaimTemplates:
   - metadata:
       name: data
