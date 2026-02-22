@@ -18,6 +18,7 @@ spec:
         cluster-name: postgres
     spec:
       serviceAccountName: patroni
+      enableServiceLinks: false
       terminationGracePeriodSeconds: 30
       containers:
       - name: postgres
